@@ -1,0 +1,24 @@
+--Rank each and every purchase of customer purchases table 
+--cust1 --order1- 100 4 
+--cust1 -order2 -150 3
+--cust2 -order3 -250 1
+--cust3 -order4- 250 1
+select customer_id , round(quantity*cost_to_customer_per_qty,0) , 
+       row_number() over(order by round(quantity*cost_to_customer_per_qty,0) desc  ) as unique_rank_sales,
+       rank() over(order by round(quantity*cost_to_customer_per_qty,0) desc) as rank_sales, 
+       dense_rank() over(order by round(quantity*cost_to_customer_per_qty,0) desc) as dense_rank_sales
+from `farmers_database.customer_purchases`
+order by 3 ; 
+
+
+---Find out top purchase of each customer , rank 1 = highest sales , highest purchase 
+select * from 
+(select customer_id ,
+       round(quantity*cost_to_customer_per_qty,0) as sales , 
+       row_number() over(partition by customer_id order by round(quantity*cost_to_customer_per_qty,0) desc  ) as unique_rank_sales,
+       rank() over(partition by customer_id order by round(quantity*cost_to_customer_per_qty,0) desc) as rank_sales, 
+       dense_rank() over(partition by customer_id order by round(quantity*cost_to_customer_per_qty,0) desc) as dense_rank_sales
+from `farmers_database.customer_purchases`
+order by 1 ,2 desc )
+where unique_rank_sales =1 or rank_sales = 1 or dense_rank_sales= 1 
+
